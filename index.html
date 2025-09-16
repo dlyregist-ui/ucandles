@@ -172,31 +172,13 @@ const Modal: React.FC<{ open: boolean; onClose: () => void; title?: string; imag
  * Icons
  ***************************/
 const IconBox = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
     <polyline points="3.29 7 12 12 20.71 7" />
   </svg>
 );
 const IconCart = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="9" cy="21" r="1" />
     <circle cx="20" cy="21" r="1" />
     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -206,7 +188,7 @@ const IconCart = () => (
 /***************************
  * Types
  ***************************/
- type ProductType =
+type ProductType =
   | "свеча"
   | "диффузор"
   | "рефил"
@@ -247,11 +229,7 @@ const BOXES: GiftBox[] = [
     fixedSetPrice: 2000,
     image: "/images/179A9273.jpg",
     templates: [
-      {
-        id: "S-fixed",
-        title: "Диффузор 1шт + Свеча 1шт + Автопарфюм 1шт",
-        slots: ["диффузор", "свеча", "автопарфюм"],
-      },
+      { id: "S-fixed", title: "Диффузор 1шт + Свеча 1шт + Автопарфюм 1шт", slots: ["диффузор", "свеча", "автопарфюм"] }
     ],
   },
   {
@@ -261,21 +239,7 @@ const BOXES: GiftBox[] = [
     fixedSetPrice: 3500,
     image: "/images/179A9301.jpg",
     templates: [
-      {
-        id: "M-fixed",
-        title:
-          "Диффузор 1 + Мыло 1 + Лосьон 1 + Свеча 2 + Скраб 1 + Бомбочка 1 + Автопарфюм 1",
-        slots: [
-          "диффузор",
-          "мыло",
-          "лосьон",
-          "свеча",
-          "свеча",
-          "скраб",
-          "бомбочка",
-          "автопарфюм",
-        ],
-      },
+      { id: "M-fixed", title: "Диффузор 1 + Мыло 1 + Лосьон 1 + Свеча 2 + Скраб 1 + Бомбочка 1 + Автопарфюм 1", slots: ["диффузор", "мыло", "лосьон", "свеча", "свеча", "скраб", "бомбочка", "автопарфюм"] }
     ],
   },
   {
@@ -285,117 +249,75 @@ const BOXES: GiftBox[] = [
     fixedSetPrice: 5000,
     image: "/images/179A9329.jpg",
     templates: [
-      {
-        id: "L-fixed",
-        title: "Диффузор 2 + Мыло 1 + Лосьон 1 + Свеча 3 + Скраб 2 + Бомбочка 3",
-        slots: [
-          "диффузор",
-          "диффузор",
-          "мыло",
-          "лосьон",
-          "свеча",
-          "свеча",
-          "свеча",
-          "скраб",
-          "скраб",
-          "бомбочка",
-          "бомбочка",
-          "бомбочка",
-        ],
-      },
+      { id: "L-fixed", title: "Диффузор 2 + Мыло 1 + Лосьон 1 + Свеча 3 + Скраб 2 + Бомбочка 3", slots: ["диффузор","диффузор","мыло","лосьон","свеча","свеча","свеча","скраб","скраб","бомбочка","бомбочка","бомбочка"] }
     ],
   },
 ];
 
 const AROMAS: Record<ProductType, Aroma[]> = {
-  диффузор: [
+  "диффузор": [
     {
       name: "Arabian Nights",
       description: "Загадочный и тёплый аромат востока.",
-      pyramid: {
-        top: ["Бергамот", "Лимон", "Шафран"],
-        heart: ["Роза", "Уд"],
-        base: ["Сандал", "Мускус", "Пачули"],
-      },
+      pyramid: { top: ["Бергамот", "Лимон", "Шафран"], heart: ["Роза", "Уд"], base: ["Сандал", "Мускус", "Пачули"] }
     },
     { name: "Astoria Lux" },
     { name: "Basil & Mint" },
     { name: "Black Currant" },
-    { name: "Black Pepper" },
+    { name: "Black Pepper" }
   ],
-  свеча: [
+  "свеча": [
     {
       name: "Arabian Nights",
       description: "Свеча Arabian Nights — загадочный и тёплый аромат востока.",
-      pyramid: {
-        top: ["Бергамот", "Лимон", "Шафран"],
-        heart: ["Роза", "Уд"],
-        base: ["Сандал", "Мускус", "Пачули"],
-      },
+      pyramid: { top: ["Бергамот", "Лимон", "Шафран"], heart: ["Роза", "Уд"], base: ["Сандал", "Мускус", "Пачули"] }
     },
     { name: "Mango Kiss" },
-    { name: "Smoked Vanilla" },
+    { name: "Smoked Vanilla" }
   ],
-  автопарфюм: [{ name: "Basil & Mint" }, { name: "Royal Roses" }],
-  рефил: [{ name: "Arabian Nights" }, { name: "Portofino Mandarino" }],
-  молочко: [{ name: "Celtic Verbena" }],
-  мыло: [{ name: "Celtic Verbena" }],
-  лосьон: [{ name: "Celtic Verbena" }],
-  скраб: [{ name: "Basil and Mint" }],
-  бомбочка: [{ name: "Basil and Mint" }],
+  "автопарфюм": [{ name: "Basil & Mint" }, { name: "Royal Roses" }],
+  "рефил": [{ name: "Arabian Nights" }, { name: "Portofino Mandarino" }],
+  "молочко": [{ name: "Celtic Verbena" }],
+  "мыло": [{ name: "Celtic Verbena" }],
+  "лосьон": [{ name: "Celtic Verbena" }],
+  "скраб": [{ name: "Basil and Mint" }],
+  "бомбочка": [{ name: "Basil and Mint" }]
 };
 
 /***************************
  * Helpers
  ***************************/
-const currency = (n: number) =>
-  new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB" }).format(n);
+const currency = (n: number) => new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB" }).format(n);
 
 /***************************
  * Component
  ***************************/
-export default function GiftSetBuilder() {
+export default function App() {
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [slotSelections, setSlotSelections] = useState<{ aroma?: Aroma }[]>([]);
-  const [detail, setDetail] = useState<{ type: ProductType; aroma: Aroma } | null>(
-    null
-  );
+  const [detail, setDetail] = useState<{ type: ProductType; aroma: Aroma } | null>(null);
   const [viewAll, setViewAll] = useState<ProductType | null>(null);
 
-  const selectedBox = useMemo(
-    () => BOXES.find((b) => b.id === selectedBoxId) || null,
-    [selectedBoxId]
-  );
-  const selectedTemplate = useMemo(
-    () => selectedBox?.templates.find((t) => t.id === selectedTemplateId) || null,
-    [selectedBox, selectedTemplateId]
-  );
+  const selectedBox = useMemo(() => BOXES.find((b) => b.id === selectedBoxId) || null, [selectedBoxId]);
+  const selectedTemplate = useMemo(() => selectedBox?.templates.find((t) => t.id === selectedTemplateId) || null, [selectedBox, selectedTemplateId]);
 
   useEffect(() => {
-    if (selectedTemplate)
-      setSlotSelections(selectedTemplate.slots.map(() => ({ aroma: undefined })));
+    if (selectedTemplate) setSlotSelections(selectedTemplate.slots.map(() => ({ aroma: undefined })));
   }, [selectedTemplateId, selectedTemplate]);
 
   const total = selectedBox?.fixedSetPrice ?? 0;
-  const isComplete = useMemo(
-    () => !!selectedTemplate && slotSelections.every((s) => s.aroma),
-    [slotSelections, selectedTemplate]
-  );
+  const isComplete = useMemo(() => !!selectedTemplate && slotSelections.every((s) => s.aroma), [slotSelections, selectedTemplate]);
 
   const addAroma = (type: ProductType, aroma: Aroma) => {
-    const idx = selectedTemplate!.slots.findIndex(
-      (t, i) => t === type && !slotSelections[i]?.aroma
-    );
+    const idx = selectedTemplate!.slots.findIndex((t, i) => t === type && !slotSelections[i]?.aroma);
     if (idx === -1) return;
     const next = [...slotSelections];
     next[idx] = { aroma };
     setSlotSelections(next);
   };
   const removeAromaByName = (type: ProductType, name: string) => {
-    const idx = selectedTemplate!.slots.findIndex(
-      (t, i) => t === type && slotSelections[i]?.aroma?.name === name
-    );
+    const idx = selectedTemplate!.slots.findIndex((t, i) => t === type && slotSelections[i]?.aroma?.name === name);
     if (idx === -1) return;
     const next = [...slotSelections];
     next[idx] = { aroma: undefined };
@@ -406,13 +328,7 @@ export default function GiftSetBuilder() {
     <div style={{ maxWidth: 1040, margin: "0 auto", padding: 16 }}>
       {/* Шаг 1 — выбор коробки */}
       {!selectedBox && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))",
-            gap: 16,
-          }}
-        >
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))", gap: 16 }}>
           {BOXES.map((box) => (
             <Card key={box.id}>
               <CardHeader>
@@ -424,30 +340,13 @@ export default function GiftSetBuilder() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Button
-                  full
-                  onClick={() => {
-                    setSelectedBoxId(box.id);
-                    setSelectedTemplateId(box.templates[0].id);
-                  }}
-                >
+                <Button full onClick={() => { setSelectedBoxId(box.id); setSelectedTemplateId(box.templates[0].id); }}>
                   Выбрать
                 </Button>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: "#6b7280",
-                    marginTop: 8,
-                    whiteSpace: "pre-line",
-                  }}
-                >
-                  {box.templates[0].title
-                    ?.split("+")
-                    .map((line, i) => (
-                      <div key={i} style={{ marginBottom: 2 }}>
-                        {line.trim()}
-                      </div>
-                    ))}
+                <div style={{ fontSize: 12, color: "#6b7280", marginTop: 8, whiteSpace: "pre-line" }}>
+                  {box.templates[0].title?.split("+").map((line, i) => (
+                    <div key={i} style={{ marginBottom: 2 }}>{line.trim()}</div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -460,28 +359,13 @@ export default function GiftSetBuilder() {
         <div style={{ marginTop: 24 }}>
           {Array.from(new Set(selectedTemplate.slots)).map((type) => {
             const need = selectedTemplate.slots.filter((t) => t === type).length;
-            const selected = slotSelections.filter(
-              (s, i) => selectedTemplate.slots[i] === type && s.aroma
-            ).length;
+            const selected = slotSelections.filter((s, i) => selectedTemplate.slots[i] === type && s.aroma).length;
             const list = AROMAS[type as ProductType] || [];
             return (
               <div key={type} style={{ marginBottom: 24 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: 10,
-                    flexWrap: "wrap",
-                    gap: 8,
-                  }}
-                >
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}
-                  >
-                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-                      Выберите: {type}
-                    </h2>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Выберите: {type}</h2>
                     <span style={{ fontSize: 12, color: selected === need ? "green" : "#6b7280" }}>
                       (нужно {need}, выбрано {selected})
                     </span>
@@ -490,24 +374,11 @@ export default function GiftSetBuilder() {
                         t === type && slotSelections[i]?.aroma ? (
                           <span
                             key={`${type}-sel-${i}`}
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 6,
-                              padding: "4px 8px",
-                              background: "#eef2ff",
-                              borderRadius: 999,
-                              fontSize: 12,
-                            }}
+                            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 8px", background: "#eef2ff", borderRadius: 999, fontSize: 12 }}
                           >
                             {slotSelections[i]!.aroma!.name}
                             <button
-                              onClick={() =>
-                                removeAromaByName(
-                                  type as ProductType,
-                                  slotSelections[i]!.aroma!.name
-                                )
-                              }
+                              onClick={() => removeAromaByName(type as ProductType, slotSelections[i]!.aroma!.name)}
                               style={{ border: "none", background: "transparent", cursor: "pointer" }}
                             >
                               ×
@@ -517,24 +388,14 @@ export default function GiftSetBuilder() {
                       )}
                     </div>
                   </div>
-                  <Button variant="ghost" onClick={() => setViewAll(type as ProductType)}>
-                    Посмотреть все
-                  </Button>
+                  <Button variant="ghost" onClick={() => setViewAll(type as ProductType)}>Посмотреть все</Button>
                 </div>
+
                 <div style={{ display: "flex", overflowX: "auto", gap: 12, paddingBottom: 8 }}>
                   {list.map((ar, i) => (
                     <Card key={ar.name + "-" + i} style={{ minWidth: 220, flex: "0 0 auto" }}>
                       <CardContent>
-                        <div
-                          style={{
-                            height: 160,
-                            background: "#f3f4f6",
-                            borderRadius: 12,
-                            display: "grid",
-                            placeItems: "center",
-                            color: "#9ca3af",
-                          }}
-                        >
+                        <div style={{ height: 160, background: "#f3f4f6", borderRadius: 12, display: "grid", placeItems: "center", color: "#9ca3af" }}>
                           Нет фото
                         </div>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -542,12 +403,8 @@ export default function GiftSetBuilder() {
                           <Badge>{type}</Badge>
                         </div>
                         <div style={{ display: "flex", gap: 6 }}>
-                          <Button variant="ghost" onClick={() => setDetail({ type: type as ProductType, aroma: ar })}>
-                            Подробнее
-                          </Button>
-                          <Button onClick={() => addAroma(type as ProductType, ar)} disabled={selected >= need}>
-                            Выбрать
-                          </Button>
+                          <Button variant="ghost" onClick={() => setDetail({ type: type as ProductType, aroma: ar })}>Подробнее</Button>
+                          <Button onClick={() => addAroma(type as ProductType, ar)} disabled={selected >= need}>Выбрать</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -563,9 +420,7 @@ export default function GiftSetBuilder() {
       {selectedBox && (
         <div style={{ marginTop: 24 }}>
           <Card>
-            <CardHeader>
-              <CardTitle>Стоимость набора</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Стоимость набора</CardTitle></CardHeader>
             <CardContent>
               <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>{currency(total)}</div>
               {selectedTemplate && (
@@ -593,21 +448,13 @@ export default function GiftSetBuilder() {
       )}
 
       {/* Aroma details modal */}
-      <Modal
-        open={!!detail}
-        onClose={() => setDetail(null)}
-        title={detail ? `${detail.type}: ${detail.aroma.name}` : ""}
-        image={detail?.aroma.image}
-      >
+      <Modal open={!!detail} onClose={() => setDetail(null)} title={detail ? `${detail.type}: ${detail.aroma.name}` : ""} image={detail?.aroma.image}>
         {detail ? (
           <div style={{ display: "grid", gap: 16 }}>
             <div style={{ fontSize: 14, lineHeight: 1.6, color: "#374151" }}>
               {detail.aroma.description || (
                 <>
-                  <div>
-                    <b>{detail.aroma.name}</b> — описание будет добавлено позднее. Расскажем о характере
-                    аромата, эффектах и форме выпуска.
-                  </div>
+                  <div><b>{detail.aroma.name}</b> — описание будет добавлено позднее. Расскажем о характере аромата, эффектах и форме выпуска.</div>
                 </>
               )}
             </div>
@@ -641,16 +488,7 @@ export default function GiftSetBuilder() {
             {(AROMAS[viewAll] || []).map((ar, i) => (
               <Card key={`${viewAll}-${ar.name}-${i}`}>
                 <CardContent>
-                  <div
-                    style={{
-                      height: 140,
-                      background: "#f3f4f6",
-                      borderRadius: 12,
-                      display: "grid",
-                      placeItems: "center",
-                      color: "#9ca3af",
-                    }}
-                  >
+                  <div style={{ height: 140, background: "#f3f4f6", borderRadius: 12, display: "grid", placeItems: "center", color: "#9ca3af" }}>
                     Нет фото
                   </div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -661,11 +499,7 @@ export default function GiftSetBuilder() {
                     <Button variant="ghost" onClick={() => setDetail({ type: viewAll!, aroma: ar })}>
                       Подробнее
                     </Button>
-                    <Button
-                      onClick={() => {
-                        addAroma(viewAll!, ar);
-                      }}
-                    >
+                    <Button onClick={() => { addAroma(viewAll!, ar); }}>
                       Выбрать
                     </Button>
                   </div>
