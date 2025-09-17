@@ -2,18 +2,81 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>Gift Set Builder</title>
+    <title>Gift Set Builder — Preview</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- React + ReactDOM с CDN -->
+    <!-- React + ReactDOM (CDN) -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Babel для JSX в браузере -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
+      :root {
+        --bg: #f3f4f6;
+        --card: #fff;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --text: #111827;
+        --primary: #111111;
+      }
+      * { box-sizing: border-box; }
       body {
-        font-family: sans-serif;
         margin: 0;
-        padding: 20px;
+        font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+        background: var(--bg);
+        color: var(--text);
+      }
+      .container { max-width: 1040px; margin: 0 auto; padding: 16px; }
+      .grid { display: grid; gap: 16px; }
+      .grid-autofit { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+      }
+      .card img {
+        width: 100%;
+        border-radius: 12px;
+        display: block;
+        object-fit: cover;
         background: #f3f4f6;
       }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+      .chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 4px 8px; background: #eef2ff; border-radius: 999px; font-size: 12px;
+      }
+      .btn {
+        appearance: none; border: 1px solid var(--primary); background: var(--primary);
+        color: #fff; border-radius: 12px; padding: 10px 14px; font-weight: 600; cursor: pointer;
+      }
+      .btn[disabled] { background: #f3f4f6; color: #9ca3af; border-color: transparent; cursor: not-allowed; }
+      .btn-ghost { background: transparent; color: var(--text); border-color: transparent; }
+      .badge { border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: 12px; background: #f9fafb; }
+      .muted { color: var(--muted); }
+      .scroll-x { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; }
+      .placeholder {
+        height: 160px; border-radius: 12px; background: #f3f4f6;
+        display: grid; place-items: center; color: #9ca3af;
+      }
+      /* Modal */
+      .modal-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,.45);
+        display: grid; place-items: center; z-index: 50;
+      }
+      .modal {
+        width: min(900px, 92vw); max-height: 90vh; overflow: auto;
+        background: #fff; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.2);
+      }
+      .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+      .modal-body { display: grid; gap: 16px; padding: 18px; }
+      .close { background: transparent; border: none; font-size: 22px; line-height: 1; cursor: pointer; }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; }
+      td { padding: 4px 8px; }
+      td:first-child { width: 160px; color: var(--muted); }
+      @media (max-width: 560px) { td:first-child { width: 120px; } }
     </style>
   </head>
   <body>
@@ -22,107 +85,294 @@
     <script type="text/babel">
       const { useState, useMemo, useEffect } = React;
 
-      /* UI helpers */
-      const Card = ({ children, style }) => (
-        <div style={{border:"1px solid #e5e7eb",borderRadius:16,padding:16,background:"#fff",...style}}>{children}</div>
-      );
-      const Button = ({ children, onClick, disabled, variant="primary" }) => (
-        <button onClick={onClick} disabled={disabled}
-          style={{
-            padding:"10px 14px",borderRadius:12,
-            border: variant==="ghost"?"1px solid transparent":"1px solid #111",
-            background: disabled?"#f3f4f6":variant==="ghost"?"transparent":"#111",
-            color: disabled?"#9ca3af":variant==="ghost"?"#111":"#fff",
-            cursor:disabled?"not-allowed":"pointer",fontWeight:600
-          }}>{children}</button>
-      );
-      const Badge = ({ children }) => (
-        <span style={{border:"1px solid #e5e7eb",borderRadius:999,padding:"4px 10px",fontSize:12,background:"#f9fafb"}}>{children}</span>
-      );
+      /********* Data *********/
+      const BOXES = [
+        {
+          id: "small", name: "Набор малый", price: 2000, image: "179A9273.jpg",
+          templates: [{ id: "S1", title: "Диффузор 1шт + Свеча 1шт + Автопарфюм 1шт", slots: ["диффузор", "свеча", "автопарфюм"] }]
+        },
+        {
+          id: "medium", name: "Набор средний", price: 3500, image: "179A9301.jpg",
+          templates: [{ id: "M1", title: "Диффузор 1 + Мыло 1 + Лосьон 1 + Свеча 2 + Скраб 1 + Бомбочка 1 + Автопарфюм 1", slots: ["диффузор","мыло","лосьон","свеча","свеча","скраб","бомбочка","автопарфюм"] }]
+        },
+        {
+          id: "large", name: "Набор большой", price: 5000, image: "179A9329.jpg",
+          templates: [{ id: "L1", title: "Диффузор 2 + Мыло 1 + Лосьон 1 + Свеча 3 + Скраб 2 + Бомбочка 3", slots: ["диффузор","диффузор","мыло","лосьон","свеча","свеча","свеча","скраб","скраб","бомбочка","бомбочка","бомбочка"] }]
+        }
+      ];
 
-      const Modal = ({open,onClose,title,children})=>{
-        if(!open) return null;
+      // Примеры ароматов. Можно расширять, добавляя image/description/pyramid
+      const AROMAS = {
+        "диффузор": [
+          { name: "Arabian Nights", image: "", description: "Загадочный восточный аккорд с тёплой базой.", pyramid: { top: ["Бергамот","Лимон","Шафран"], heart: ["Роза","Уд"], base: ["Сандал","Мускус","Пачули"] } },
+          { name: "Astoria Lux" },
+          { name: "Basil & Mint" },
+          { name: "Black Currant" },
+          { name: "Black Pepper" }
+        ],
+        "свеча": [
+          { name: "Arabian Nights", description: "Версия в свече — более мягкая, уютная.", pyramid: { top: ["Бергамот","Лимон","Шафран"], heart: ["Роза","Уд"], base: ["Сандал","Мускус","Пачули"] } },
+          { name: "Mango Kiss" },
+          { name: "Smoked Vanilla" }
+        ],
+        "автопарфюм": [{ name: "Royal Roses" }, { name: "Basil & Mint" }],
+        "мыло": [{ name: "Celtic Verbena" }],
+        "лосьон": [{ name: "Celtic Verbena" }],
+        "скраб": [{ name: "Basil and Mint" }],
+        "бомбочка": [{ name: "Basil and Mint" }]
+      };
+
+      /********* UI helpers *********/
+      const Card = ({ children }) => <div className="card">{children}</div>;
+      const Button = ({ children, onClick, disabled, variant="primary", full }) => (
+        <button
+          className={`btn ${variant === "ghost" ? "btn-ghost" : ""}`}
+          onClick={onClick}
+          disabled={disabled}
+          style={{ width: full ? "100%" : undefined }}
+        >
+          {children}
+        </button>
+      );
+      const Badge = ({ children }) => <span className="badge">{children}</span>;
+      const currency = (n) => new Intl.NumberFormat("ru-RU",{style:"currency",currency:"RUB"}).format(n);
+
+      const Modal = ({ open, onClose, title, image, children }) => {
+        if (!open) return null;
         return (
-          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",display:"grid",placeItems:"center"}}
-            onClick={onClose}>
-            <div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:16,padding:20,maxWidth:600,width:"90%"}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}>
-                <h3>{title}</h3>
-                <button onClick={onClose} style={{fontSize:20,border:"none",background:"transparent",cursor:"pointer"}}>×</button>
+          <div className="modal-backdrop" onClick={onClose}>
+            <div className="modal" onClick={(e)=>e.stopPropagation()}>
+              <div className="modal-header">
+                <h3 style={{margin:0}}>{title}</h3>
+                <button className="close" aria-label="Закрыть" onClick={onClose}>×</button>
               </div>
-              {children}
+              <div className="modal-body">
+                {image ? (
+                  <img src={image} alt={title||""} style={{ width: "100%", maxHeight: 360, objectFit: "cover", borderRadius: 12 }} />
+                ) : null}
+                {children}
+              </div>
             </div>
           </div>
         );
       };
 
-      const BOXES = [
-        {id:"small", name:"Набор малый", price:2000, image:"179A9273.jpg", slots:["диффузор","свеча","автопарфюм"]},
-        {id:"medium", name:"Набор средний", price:3500, image:"179A9301.jpg", slots:["диффузор","мыло","лосьон","свеча","свеча","скраб","бомбочка","автопарфюм"]},
-        {id:"large", name:"Набор большой", price:5000, image:"179A9329.jpg", slots:["диффузор","диффузор","мыло","лосьон","свеча","свеча","свеча","скраб","скраб","бомбочка","бомбочка","бомбочка"]},
-      ];
-      const AROMAS = {
-        "диффузор":[{name:"Arabian Nights"},{name:"Astoria Lux"}],
-        "свеча":[{name:"Mango Kiss"},{name:"Smoked Vanilla"}],
-        "автопарфюм":[{name:"Royal Roses"}],
-        "мыло":[{name:"Celtic Verbena"}],
-        "лосьон":[{name:"Celtic Verbena"}],
-        "скраб":[{name:"Basil & Mint"}],
-        "бомбочка":[{name:"Basil & Mint"}]
-      };
-
+      /********* App *********/
       function App(){
-        const [box,setBox]=useState(null);
-        const [selections,setSelections]=useState([]);
-        const [detail,setDetail]=useState(null);
+        const [boxId, setBoxId] = React.useState(null);
+        const [templateId, setTemplateId] = React.useState(null);
+        const [slots, setSlots] = React.useState([]); // [{type, aroma?}]
+        const [detail, setDetail] = React.useState(null); // {type, aroma}
+        const [viewAll, setViewAll] = React.useState(null); // type
 
-        const isComplete = box && selections.length===box.slots.length && selections.every(x=>x);
+        const box = useMemo(()=>BOXES.find(b=>b.id===boxId)||null,[boxId]);
+        const template = useMemo(()=>box?.templates.find(t=>t.id===templateId)||null,[box, templateId]);
 
-        const addAroma=(i,ar)=>{const next=[...selections]; next[i]=ar; setSelections(next);};
+        // init slots on template change
+        useEffect(()=>{
+          if(template){
+            setSlots(template.slots.map((type)=>({ type, aroma: null })));
+          }
+        }, [templateId, template]);
 
+        const total = box?.price ?? 0;
+        const isComplete = template && slots.every(s=>!!s.aroma);
+
+        // выбирать аромат: кладём в первый свободный слот данного типа
+        const addAroma = (type, aroma) => {
+          if(!template) return;
+          const idx = slots.findIndex((s)=> s.type===type && !s.aroma);
+          if(idx===-1) return;
+          const next = [...slots];
+          next[idx] = { ...next[idx], aroma };
+          setSlots(next);
+        };
+        const removeAromaByName = (type, name) => {
+          const idx = slots.findIndex((s)=> s.type===type && s.aroma?.name===name);
+          if(idx===-1) return;
+          const next = [...slots];
+          next[idx] = { ...next[idx], aroma: null };
+          setSlots(next);
+        };
+
+        // экран выбора коробки
         if(!box){
           return (
-            <div style={{display:"grid",gap:16}}>
-              {BOXES.map(b=>
-                <Card key={b.id}>
-                  <h3>{b.name} <Badge>{b.price} ₽</Badge></h3>
-                  <Button onClick={()=>{setBox(b);setSelections(b.slots.map(()=>null));}}>Выбрать</Button>
-                </Card>)}
+            <div className="container">
+              <h1 style={{marginTop:0}}>Выберите набор</h1>
+              <div className="grid grid-autofit">
+                {BOXES.map(b=>(
+                  <Card key={b.id}>
+                    <div className="grid" style={{gap:12}}>
+                      <img src={b.image} alt={b.name} height="180" style={{height:180}} onerror="this.style.display='none'"/>
+                      <div className="row">
+                        <h3 style={{margin:0, fontSize:18}}>{b.name}</h3>
+                        <Badge>{currency(b.price)}</Badge>
+                      </div>
+                      <div className="muted" style={{fontSize:12, whiteSpace:"pre-line"}}>
+                        {b.templates[0].title.split("+").map((line,i)=>(<div key={i} style={{marginBottom:2}}>{line.trim()}</div>))}
+                      </div>
+                      <Button full onClick={()=>{ setBoxId(b.id); setTemplateId(b.templates[0].id); }}>
+                        Выбрать
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </div>
           );
         }
 
+        // контент сборки набора
         return (
-          <div>
-            <h2>{box.name}</h2>
-            {box.slots.map((slot,i)=>(
-              <div key={i} style={{margin:"10px 0"}}>
-                <b>{slot}</b>: {selections[i]?.name||"—"}
-                <div style={{display:"flex",gap:8,overflowX:"auto"}}>
-                  {(AROMAS[slot]||[]).map((ar,j)=>(
-                    <Card key={j} style={{minWidth:150}}>
-                      <div>{ar.name}</div>
-                      <Button onClick={()=>setDetail(ar)} variant="ghost">Подробнее</Button>
-                      <Button onClick={()=>addAroma(i,ar)}>Выбрать</Button>
-                    </Card>
-                  ))}
+          <div className="container">
+            <div className="row" style={{marginBottom:14}}>
+              <div className="row" style={{gap:10}}>
+                <img src={box.image} alt="" width="64" height="48" style={{borderRadius:8, objectFit:"cover"}} onerror="this.style.display='none'"/>
+                <div>
+                  <h2 style={{margin:"0 0 4px 0", fontSize:20}}>{box.name}</h2>
+                  <div className="muted" style={{fontSize:12}}>{template?.title}</div>
                 </div>
               </div>
-            ))}
-            <h3>Стоимость: {box.price} ₽</h3>
-            <Button disabled={!isComplete}>Добавить в корзину</Button>
+              <div><Badge>{currency(total)}</Badge></div>
+            </div>
 
-            <Modal open={!!detail} onClose={()=>setDetail(null)} title={detail?.name}>
-              <p>Описание аромата {detail?.name || ""} будет добавлено.</p>
+            {/* секции по типам с каруселью */}
+            {Array.from(new Set(template.slots)).map((type)=>{
+              const need = template.slots.filter(t=>t===type).length;
+              const selectedCount = slots.filter(s=>s.type===type && s.aroma).length;
+              const list = AROMAS[type] || [];
+              return (
+                <div key={type} style={{marginBottom:24}}>
+                  <div className="row" style={{gap:12, alignItems:"baseline"}}>
+                    <div style={{display:"flex", alignItems:"baseline", gap:8, flexWrap:"wrap"}}>
+                      <h3 style={{margin:0, fontSize:18}}>Выберите: {type}</h3>
+                      <span className="muted" style={{fontSize:12}}>(нужно {need}, выбрано {selectedCount})</span>
+                      <div className="chips">
+                        {slots.map((s, i)=> s.type===type && s.aroma ? (
+                          <span key={`${type}-${i}`} className="chip">
+                            {s.aroma.name}
+                            <button className="close" style="font-size:16px" title="Удалить"
+                              onclick="event.stopPropagation();" />
+                            <span style={{cursor:"pointer"}} onClick={()=> removeAromaByName(type, s.aroma.name)}>×</span>
+                          </span>
+                        ) : null)}
+                      </div>
+                    </div>
+                    <Button variant="ghost" onClick={()=> setViewAll(type)}>Посмотреть все</Button>
+                  </div>
+
+                  <div className="scroll-x">
+                    {list.map((ar, i)=>(
+                      <div key={ar.name + "-" + i} className="card" style={{minWidth: 220}}>
+                        <div className="grid" style={{gap:10}}>
+                          {ar.image
+                            ? <img src={ar.image} alt={ar.name} height="160" style={{height:160}} onerror="this.style.display='none'"/>
+                            : <div className="placeholder">Нет фото</div>}
+                          <div className="row">
+                            <div style={{fontWeight:700}}>{ar.name}</div>
+                            <span className="badge">{type}</span>
+                          </div>
+                          <div style={{display:"flex", gap:6}}>
+                            <Button variant="ghost" onClick={()=> setDetail({type, aroma: ar})}>Подробнее</Button>
+                            <Button onClick={()=> addAroma(type, ar)} disabled={selectedCount>=need}>Выбрать</Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* итог */}
+            <div style={{marginTop:24}}>
+              <div className="card">
+                <div className="row">
+                  <h3 style={{margin:0}}>Стоимость набора</h3>
+                  <div style={{fontWeight:700}}>{currency(total)}</div>
+                </div>
+                <div style={{marginTop:10}}>
+                  <div style={{fontWeight:600, marginBottom:6}}>Вы выбрали:</div>
+                  <ul style={{margin:0, paddingLeft:18}}>
+                    {slots.map((s, i)=>(
+                      <li key={i} style={{fontSize:14, lineHeight:1.6}}>
+                        {s.type}: {s.aroma?.name || "— не выбрано"}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div style={{marginTop:12}}>
+                  <Button full disabled={!isComplete}>Добавить в корзину</Button>
+                </div>
+              </div>
+            </div>
+
+            {/* модалка «Подробнее» */}
+            <Modal
+              open={!!detail}
+              onClose={()=> setDetail(null)}
+              title={detail ? `${detail.type}: ${detail.aroma.name}` : ""}
+              image={detail?.aroma.image}
+            >
+              {detail ? (
+                <>
+                  <div className="muted" style={{fontSize:14, lineHeight:1.6}}>
+                    {detail.aroma.description || <span>Описание будет добавлено позже.</span>}
+                  </div>
+                  <div className="card">
+                    <h4 style={{margin:"0 0 8px 0"}}>Пирамида аромата</h4>
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td>Верхние ноты</td>
+                          <td>{(detail.aroma.pyramid?.top || []).join(", ") || "—"}</td>
+                        </tr>
+                        <tr>
+                          <td>Сердце</td>
+                          <td>{(detail.aroma.pyramid?.heart || []).join(", ") || "—"}</td>
+                        </tr>
+                        <tr>
+                          <td>База</td>
+                          <td>{(detail.aroma.pyramid?.base || []).join(", ") || "—"}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : null}
             </Modal>
+
+            {/* модалка «Посмотреть все» */}
+            <Modal open={!!viewAll} onClose={()=> setViewAll(null)} title={viewAll ? `Все ароматы: ${viewAll}` : ""}>
+              {viewAll ? (
+                <div className="grid" style={{gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))", gap: 12}}>
+                  {(AROMAS[viewAll]||[]).map((ar, i)=>(
+                    <div key={`${viewAll}-${ar.name}-${i}`} className="card">
+                      <div className="grid" style={{gap:10}}>
+                        {ar.image
+                          ? <img src={ar.image} alt={ar.name} height="140" style={{height:140}} onerror="this.style.display='none'"/>
+                          : <div className="placeholder" style={{height:140}}>Нет фото</div>}
+                        <div className="row">
+                          <div style={{fontWeight:700}}>{ar.name}</div>
+                          <span className="badge">{viewAll}</span>
+                        </div>
+                        <div style={{display:"flex", gap:6}}>
+                          <Button variant="ghost" onClick={()=> setDetail({type:viewAll, aroma: ar})}>Подробнее</Button>
+                          <Button onClick={()=> addAroma(viewAll, ar)}>Выбрать</Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </Modal>
+
           </div>
         );
       }
 
-      ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     </script>
-
-    <!-- Подключаем Babel для JSX -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </body>
 </html>
