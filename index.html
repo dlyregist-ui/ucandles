@@ -1,293 +1,318 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 
-/** маленькие утилиты UI */
-const Card: React.FC<React.PropsWithChildren<{ clickable?: boolean }>> = ({ children, clickable }) => (
+/***************************
+ * Minimal UI kit (+ tiny icons)
+ ***************************/
+const Card: React.FC<React.PropsWithChildren<{ style?: React.CSSProperties; onClick?: () => void }>> = ({ children, style, onClick }) => (
   <div
-    className="card"
+    onClick={onClick}
     style={{
-      background: "#fff", border: "1px solid #e5e7eb", borderRadius: 16,
-      boxShadow: "0 1px 2px rgba(0,0,0,.04)", padding: 16
+      border: "1px solid #e5e7eb",
+      borderRadius: 16,
+      padding: 16,
+      boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+      background: "#fff",
+      position: "relative",
+      cursor: onClick ? "pointer" : "default",
+      transition: "all 0.3s ease",
+      overflow: "hidden",
+      ...style,
+    }}
+    onMouseEnter={(e) => {
+      const overlay = e.currentTarget.querySelector(".overlay") as HTMLElement;
+      if (overlay) overlay.style.opacity = "1";
+    }}
+    onMouseLeave={(e) => {
+      const overlay = e.currentTarget.querySelector(".overlay") as HTMLElement;
+      if (overlay) overlay.style.opacity = "0";
     }}
   >
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>{children}</div>
-    {clickable && (
-      <div
-        className="overlay"
-        style={{
-          position: "absolute", inset: 0, borderRadius: 16, background: "rgba(0,0,0,.45)",
-          color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, opacity: 0,
-          transition: "opacity .2s ease", pointerEvents: "none"
-        }}
-      >Подробнее</div>
-    )}
-  </div>
-);
-const Button: React.FC<React.PropsWithChildren<{ onClick?: () => void; disabled?: boolean; full?: boolean; variant?: "primary" | "ghost" }>> =
-  ({ children, onClick, disabled, full, variant = "primary" }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
+    {children}
+    <div
+      className="overlay"
       style={{
-        width: full ? "100%" : undefined,
-        padding: "10px 14px", borderRadius: 12, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer",
-        background: variant === "ghost" ? "transparent" : (disabled ? "#f3f4f6" : "#111"),
-        color: variant === "ghost" ? "#111" : (disabled ? "#9ca3af" : "#fff"),
-        border: variant === "ghost" ? "1px solid transparent" : (disabled ? "1px solid transparent" : "1px solid #111")
+        position: "absolute",
+        inset: 0,
+        background: "rgba(0,0,0,0.5)",
+        color: "#fff",
+        display: "grid",
+        placeItems: "center",
+        fontSize: 16,
+        fontWeight: 600,
+        opacity: 0,
+        transition: "opacity 0.3s ease",
       }}
     >
-      {children}
-    </button>
-  );
+      Подробнее
+    </div>
+  </div>
+);
+const CardHeader: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <div style={{ marginBottom: 8 }}>{children}</div>
+);
+const CardTitle: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <h3
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      margin: 0,
+      fontSize: 16,
+      fontWeight: 600,
+    }}
+  >
+    {children}
+  </h3>
+);
+const CardContent: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <div style={{ display: "grid", gap: 10 }}>{children}</div>
+);
+const Button: React.FC<
+  React.PropsWithChildren<{
+    onClick?: () => void;
+    disabled?: boolean;
+    full?: boolean;
+    variant?: "primary" | "ghost";
+  }>
+> = ({ children, onClick, disabled, full, variant = "primary" }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    style={{
+      width: full ? "100%" : undefined,
+      padding: "10px 14px",
+      borderRadius: 12,
+      border: variant === "ghost" ? "1px solid transparent" : "1px solid #111",
+      background: disabled ? "#f3f4f6" : variant === "ghost" ? "transparent" : "#111",
+      color: disabled ? "#9ca3af" : variant === "ghost" ? "#111" : "#fff",
+      cursor: disabled ? "not-allowed" : "pointer",
+      fontWeight: 600,
+    }}
+  >
+    {children}
+  </button>
+);
 const Badge: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
-  <span style={{ border: "1px solid #e5e7eb", borderRadius: 999, padding: "4px 10px", fontSize: 12, background: "#f9fafb" }}>{children}</span>
+  <span
+    style={{
+      border: "1px solid #e5e7eb",
+      borderRadius: 999,
+      padding: "4px 10px",
+      fontSize: 12,
+      color: "#374151",
+      background: "#f9fafb",
+    }}
+  >
+    {children}
+  </span>
 );
 
-/** модалка */
-const Modal: React.FC<{ open: boolean; onClose: () => void; title?: string }> = ({ open, onClose, title, children }) => {
+/***************************
+ * Modal
+ ***************************/
+const Modal: React.FC<{ open: boolean; onClose: () => void; title?: string; image?: string }> = ({
+  open,
+  onClose,
+  title,
+  image,
+  children,
+}) => {
   if (!open) return null;
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.45)",
+        display: "grid",
+        placeItems: "center",
+        zIndex: 50,
+      }}
       onClick={onClose}
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", display: "grid", placeItems: "center", zIndex: 50 }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ width: "min(900px,92vw)", maxHeight: "90vh", overflow: "auto", background: "#fff", borderRadius: 16, boxShadow: "0 10px 30px rgba(0,0,0,.2)" }}
+        style={{
+          width: "min(900px, 92vw)",
+          maxHeight: "90vh",
+          overflow: "auto",
+          background: "#fff",
+          borderRadius: 16,
+          boxShadow: "0 10px 30px rgba(0,0,0,.2)",
+        }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 18px", borderBottom: "1px solid #e5e7eb" }}>
-          <h3 style={{ margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "transparent", border: 0, fontSize: 22, cursor: "pointer" }}>×</button>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "14px 18px",
+            borderBottom: "1px solid #e5e7eb",
+          }}
+        >
+          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{title}</h3>
+          <button
+            onClick={onClose}
+            aria-label="Закрыть"
+            style={{
+              background: "transparent",
+              border: "none",
+              fontSize: 22,
+              lineHeight: 1,
+              cursor: "pointer",
+            }}
+          >
+            ×
+          </button>
         </div>
-        <div style={{ padding: 18, display: "grid", gap: 16 }}>{children}</div>
+        <div style={{ display: "grid", gap: 16, padding: 18 }}>{children}</div>
       </div>
     </div>
   );
 };
 
-/** типы */
-type ProductType = "диффузор" | "свеча" | "автопарфюм" | "мыло" | "лосьон" | "скраб" | "бомбочка" | "рефил" | "молочко";
-type Aroma = { name: string; image?: string; description?: string; pyramid?: { top?: string[]; heart?: string[]; base?: string[] } };
-type BoxTemplate = { id: string; title: string; slots: ProductType[] };
-type Box = { id: string; name: string; price: number; image?: string; templates: BoxTemplate[] };
+/***************************
+ * Types
+ ***************************/
+type ProductType =
+  | "свеча"
+  | "диффузор"
+  | "рефил"
+  | "молочко"
+  | "мыло"
+  | "скраб"
+  | "автопарфюм"
+  | "лосьон"
+  | "бомбочка";
+interface Aroma {
+  name: string;
+  image?: string;
+  description?: string;
+  pyramid?: { top?: string[]; heart?: string[]; base?: string[] };
+}
+interface BoxTemplate {
+  id: string;
+  slots: ProductType[];
+  title?: string;
+}
+interface GiftBox {
+  id: string;
+  name: string;
+  basePrice: number;
+  fixedSetPrice?: number;
+  image?: string;
+  templates: BoxTemplate[];
+}
 
-/** данные */
-const BOXES: Box[] = [
-  { id: "small", name: "Набор малый", price: 2000, image: "/images/179A9273.jpg", templates: [{ id: "S1", title: "Диффузор 1шт + Свеча 1шт + Автопарфюм 1шт", slots: ["диффузор", "свеча", "автопарфюм"] }] },
-  { id: "medium", name: "Набор средний", price: 3500, image: "/images/179A9301.jpg", templates: [{ id: "M1", title: "Диффузор 1 + Мыло 1 + Лосьон 1 + Свеча 2 + Скраб 1 + Бомбочка 1 + Автопарфюм 1", slots: ["диффузор","мыло","лосьон","свеча","свеча","скраб","бомбочка","автопарфюм"] }] },
-  { id: "large", name: "Набор большой", price: 5000, image: "/images/179A9329.jpg", templates: [{ id: "L1", title: "Диффузор 2 + Мыло 1 + Лосьон 1 + Свеча 3 + Скраб 2 + Бомбочка 3", slots: ["диффузор","диффузор","мыло","лосьон","свеча","свеча","свеча","скраб","скраб","бомбочка","бомбочка","бомбочка"] }] },
+/***************************
+ * Data
+ ***************************/
+const BOXES: GiftBox[] = [
+  {
+    id: "small",
+    name: "Набор малый",
+    basePrice: 0,
+    fixedSetPrice: 2000,
+    image: "/images/179A9273.jpg",
+    templates: [
+      {
+        id: "S-fixed",
+        title: "Диффузор 1шт + Свеча 1шт + Автопарфюм 1шт",
+        slots: ["диффузор", "свеча", "автопарфюм"],
+      },
+    ],
+  },
 ];
 
 const AROMAS: Record<ProductType, Aroma[]> = {
-  "диффузор": [
-    { name: "Arabian Nights", description: "Загадочный восточный аккорд с тёплой базой.", pyramid: { top: ["Бергамот","Лимон","Шафран"], heart: ["Роза","Уд"], base: ["Сандал","Мускус","Пачули"] } },
-    { name: "Astoria Lux" }, { name: "Basil & Mint" }, { name: "Black Currant" }, { name: "Black Pepper" }
+  диффузор: [
+    { name: "Arabian Nights", description: "Загадочный и тёплый аромат востока." },
+    { name: "Astoria Lux" },
   ],
-  "свеча": [
-    { name: "Arabian Nights", description: "Версия в свече — мягкая, уютная.", pyramid: { top: ["Бергамот","Лимон","Шафран"], heart: ["Роза","Уд"], base: ["Сандал","Мускус","Пачули"] } },
-    { name: "Mango Kiss" }, { name: "Smoked Vanilla" }
-  ],
-  "автопарфюм": [{ name: "Royal Roses" }, { name: "Basil & Mint" }],
-  "мыло": [{ name: "Celtic Verbena" }],
-  "лосьон": [{ name: "Celtic Verbena" }],
-  "скраб": [{ name: "Basil and Mint" }],
-  "бомбочка": [{ name: "Basil and Mint" }],
-  "рефил": [], "молочко": []
+  свеча: [{ name: "Mango Kiss" }],
+  автопарфюм: [{ name: "Basil & Mint" }],
+  рефил: [],
+  молочко: [],
+  мыло: [],
+  лосьон: [],
+  скраб: [],
+  бомбочка: [],
 };
 
-const currency = (n: number) => new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB" }).format(n);
+/***************************
+ * Helpers
+ ***************************/
+const currency = (n: number) =>
+  new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB" }).format(n);
 
-/** главный компонент */
-export default function App() {
-  const [boxId, setBoxId] = useState<string | null>(null);
-  const [templateId, setTemplateId] = useState<string | null>(null);
-  const [slots, setSlots] = useState<{ type: ProductType; aroma: Aroma | null }[]>([]);
+/***************************
+ * Component
+ ***************************/
+export default function GiftSetBuilder() {
+  const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [slotSelections, setSlotSelections] = useState<{ aroma?: Aroma }[]>([]);
   const [detail, setDetail] = useState<{ type: ProductType; aroma: Aroma } | null>(null);
-  const [viewAll, setViewAll] = useState<ProductType | null>(null);
 
-  const box = useMemo(() => BOXES.find(b => b.id === boxId) || null, [boxId]);
-  const template = useMemo(() => box?.templates.find(t => t.id === templateId) || null, [box, templateId]);
+  const selectedBox = useMemo(() => BOXES.find((b) => b.id === selectedBoxId) || null, [selectedBoxId]);
+  const selectedTemplate = useMemo(() => selectedBox?.templates.find((t) => t.id === selectedTemplateId) || null, [selectedBox, selectedTemplateId]);
 
-  useEffect(() => { if (template) setSlots(template.slots.map(type => ({ type, aroma: null }))); }, [templateId, template]);
+  useEffect(() => {
+    if (selectedTemplate) setSlotSelections(selectedTemplate.slots.map(() => ({ aroma: undefined })));
+  }, [selectedTemplateId, selectedTemplate]);
 
-  const isComplete = !!template && slots.every(s => s.aroma);
-  const total = box?.price ?? 0;
+  const total = selectedBox?.fixedSetPrice ?? 0;
 
-  const addAroma = (type: ProductType, aroma: Aroma) => {
-    if (!template) return;
-    const idx = slots.findIndex(s => s.type === type && !s.aroma);
-    if (idx === -1) return;
-    const next = [...slots];
-    next[idx] = { ...next[idx], aroma };
-    setSlots(next);
-    // закрыть любые модалки/оверлеи, чтобы не было «серого экрана»
-    setDetail(null);
-    setViewAll(null);
-  };
-  const removeAromaByName = (type: ProductType, name: string) => {
-    const idx = slots.findIndex(s => s.type === type && s.aroma?.name === name);
-    if (idx === -1) return;
-    const next = [...slots];
-    next[idx] = { ...next[idx], aroma: null };
-    setSlots(next);
-  };
-
-  /* экран выбора коробки */
-  if (!box) {
-    return (
-      <div style={{ maxWidth: 1040, margin: "0 auto", padding: 16 }}>
-        <h1 style={{ marginTop: 0 }}>Выберите набор</h1>
-        <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))" }}>
-          {BOXES.map(b => (
-            <Card key={b.id}>
-              {/* медиа */}
-              <div style={{ height: 180, borderRadius: 12, background: "#f3f4f6" }}>
-                {/* В канве картинки не подгрузятся — это ок. На GitHub Pages будут. */}
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h3 style={{ margin: 0, fontSize: 18 }}>{b.name}</h3>
-                <Badge>{currency(b.price)}</Badge>
-              </div>
-              <div style={{ fontSize: 12, color: "#6b7280", whiteSpace: "pre-line" }}>
-                {b.templates[0].title.split("+").map((t, i) => <div key={i}>{t.trim()}</div>)}
-              </div>
-              {/* фикс выравнивания кнопки: обертка с marginTop:auto */}
-              <div style={{ marginTop: "auto" }}>
-                <Button full onClick={() => { setBoxId(b.id); setTemplateId(b.templates[0].id); }}>Выбрать</Button>
-              </div>
+  return (
+    <div style={{ maxWidth: 1040, margin: "0 auto", padding: 16 }}>
+      {!selectedBox && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))", gap: 16 }}>
+          {BOXES.map((box) => (
+            <Card key={box.id}>
+              <CardHeader>
+                <CardTitle>
+                  <span>{box.name}</span>
+                  <Badge>{currency(box.fixedSetPrice ?? box.basePrice)}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div style={{ flex: 1 }} />
+                <Button full onClick={() => { setSelectedBoxId(box.id); setSelectedTemplateId(box.templates[0].id); }}>Выбрать</Button>
+                <div style={{ fontSize: 12, color: "#6b7280", marginTop: 8, whiteSpace: "pre-line" }}>
+                  {box.templates[0].title?.split("+").map((line, i) => (
+                    <div key={i}>{line.trim()}</div>
+                  ))}
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
-      </div>
-    );
-  }
+      )}
 
-  /* сборка набора */
-  return (
-    <div style={{ maxWidth: 1040, margin: "0 auto", padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <div style={{ width: 64, height: 48, borderRadius: 8, background: "#f3f4f6" }} />
-          <div>
-            <h2 style={{ margin: "0 0 4px 0", fontSize: 20 }}>{box.name}</h2>
-            <div style={{ fontSize: 12, color: "#6b7280" }}>{template?.title}</div>
-          </div>
-        </div>
-        <Badge>{currency(total)}</Badge>
-      </div>
-
-      {Array.from(new Set(template!.slots)).map((type) => {
-        const need = template!.slots.filter(t => t === type).length;
-        const selected = slots.filter(s => s.type === type && s.aroma).length;
-        const list = AROMAS[type] || [];
-        return (
-          <div key={type} style={{ marginBottom: 24 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12 }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-                <h3 style={{ margin: 0, fontSize: 18 }}>Выберите: {type}</h3>
-                <span style={{ fontSize: 12, color: "#6b7280" }}>(нужно {need}, выбрано {selected})</span>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {slots.map((s, i) =>
-                    s.type === type && s.aroma ? (
-                      <span key={`${type}-${i}`} style={{ background: "#eef2ff", borderRadius: 999, padding: "4px 8px", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 6 }}>
-                        {s.aroma.name}
-                        <span style={{ cursor: "pointer" }} onClick={() => removeAromaByName(type, s.aroma!.name)}>×</span>
-                      </span>
-                    ) : null
-                  )}
-                </div>
+      {selectedBox && selectedTemplate && (
+        <div style={{ marginTop: 24 }}>
+          {Array.from(new Set(selectedTemplate.slots)).map((type) => (
+            <div key={type} style={{ marginBottom: 24 }}>
+              <h2>Выберите: {type}</h2>
+              <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }}>
+                {(AROMAS[type] || []).map((ar, i) => (
+                  <Card key={i} onClick={() => setDetail({ type: type as ProductType, aroma: ar })} style={{ minWidth: 220, flex: "0 0 auto" }}>
+                    <CardContent>
+                      <div style={{ height: 160, background: "#f3f4f6", borderRadius: 12, display: "grid", placeItems: "center", color: "#9ca3af" }}>Нет фото</div>
+                      <div style={{ fontWeight: 700 }}>{ar.name}</div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-              <Button variant="ghost" onClick={() => setViewAll(type)}>Посмотреть все</Button>
             </div>
-
-            <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }}>
-              {list.map((ar, i) => (
-                <div
-                  key={ar.name + "-" + i}
-                  className="card"
-                  style={{ minWidth: 220, border: "1px solid #e5e7eb", borderRadius: 16, padding: 16, position: "relative", cursor: "pointer" }}
-                  onClick={() => setDetail({ type, aroma: ar })}
-                  onMouseEnter={(e) => { const ov = (e.currentTarget.querySelector(".overlay") as HTMLElement); if (ov) ov.style.opacity = "1"; }}
-                  onMouseLeave={(e) => { const ov = (e.currentTarget.querySelector(".overlay") as HTMLElement); if (ov) ov.style.opacity = "0"; }}
-                >
-                  <div className="overlay" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.45)", color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, borderRadius: 16, opacity: 0, transition: "opacity .2s ease" }}>Подробнее</div>
-                  <div style={{ height: 160, borderRadius: 12, background: "#f3f4f6", display: "grid", placeItems: "center", color: "#9ca3af" }}>Нет фото</div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontWeight: 700 }}>{ar.name}</div>
-                    <Badge>{type}</Badge>
-                  </div>
-                  {/* выравнивание кнопки: отталкиваем вниз */}
-                  <div style={{ marginTop: "auto", display: "flex", gap: 6 }}>
-                    <Button onClick={(e) => { e.stopPropagation(); addAroma(type, ar); }} disabled={selected >= need}>Выбрать</Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-
-      {/* итог */}
-      <div style={{ marginTop: 24 }}>
-        <div className="card" style={{ padding: 16, border: "1px solid #e5e7eb", borderRadius: 16, background: "#fff" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h3 style={{ margin: 0 }}>Стоимость набора</h3>
-            <div style={{ fontWeight: 700 }}>{currency(total)}</div>
-          </div>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontWeight: 600, marginBottom: 6 }}>Вы выбрали:</div>
-            <ul style={{ margin: 0, paddingLeft: 18 }}>
-              {slots.map((s, i) => (
-                <li key={i} style={{ fontSize: 14, lineHeight: 1.6 }}>{s.type}: {s.aroma?.name || "— не выбрано"}</li>
-              ))}
-            </ul>
-          </div>
-          <div style={{ marginTop: 12 }}><Button full disabled={!isComplete}>Добавить в корзину</Button></div>
+          ))}
         </div>
-      </div>
+      )}
 
-      {/* модалка ароматов */}
-      <Modal open={!!detail} onClose={() => setDetail(null)} title={detail ? `${detail.type}: ${detail.aroma.name}` : ""}>
-        {detail ? (
-          <>
-            <div style={{ fontSize: 14, color: "#374151" }}>{detail.aroma.description || "Описание будет добавлено позже."}</div>
-            <div className="card" style={{ padding: 16, border: "1px solid #e5e7eb", borderRadius: 12 }}>
-              <h4 style={{ margin: "0 0 8px 0" }}>Пирамида аромата</h4>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-                <tbody>
-                  <tr><td style={{ width: 160, color: "#6b7280", padding: "4px 8px" }}>Верхние ноты</td><td style={{ padding: "4px 8px" }}>{(detail.aroma.pyramid?.top || []).join(", ") || "—"}</td></tr>
-                  <tr><td style={{ width: 160, color: "#6b7280", padding: "4px 8px" }}>Сердце</td><td style={{ padding: "4px 8px" }}>{(detail.aroma.pyramid?.heart || []).join(", ") || "—"}</td></tr>
-                  <tr><td style={{ width: 160, color: "#6b7280", padding: "4px 8px" }}>База</td><td style={{ padding: "4px 8px" }}>{(detail.aroma.pyramid?.base || []).join(", ") || "—"}</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </>
-        ) : null}
-      </Modal>
-
-      {/* модалка «Посмотреть все» */}
-      <Modal open={!!viewAll} onClose={() => setViewAll(null)} title={viewAll ? `Все ароматы: ${viewAll}` : ""}>
-        {viewAll ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))", gap: 12 }}>
-            {(AROMAS[viewAll] || []).map((ar, i) => (
-              <div key={`${viewAll}-${ar.name}-${i}`} className="card" style={{ padding: 16, border: "1px solid #e5e7eb", borderRadius: 16 }}>
-                <div
-                  className="hover"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setDetail({ type: viewAll, aroma: ar })}
-                >
-                  <div style={{ height: 140, borderRadius: 12, background: "#f3f4f6", display: "grid", placeItems: "center", color: "#9ca3af" }}>Нет фото</div>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 }}>
-                  <div style={{ fontWeight: 700 }}>{ar.name}</div>
-                  <Badge>{viewAll}</Badge>
-                </div>
-                <div style={{ marginTop: "auto", display: "flex", gap: 6 }}>
-                  <Button onClick={() => addAroma(viewAll, ar)}>Выбрать</Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
+      <Modal open={!!detail} onClose={() => setDetail(null)} title={detail?.aroma.name}>
+        {detail ? <div>{detail.aroma.description || "Описание скоро будет"}</div> : null}
       </Modal>
     </div>
   );
