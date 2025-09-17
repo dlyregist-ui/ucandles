@@ -1,9 +1,15 @@
 import React, { useMemo, useState, useEffect } from "react";
 
 /***************************
- * Minimal UI kit (+ tiny icons)
+ * UI kit
  ***************************/
-const Card: React.FC<React.PropsWithChildren<{ style?: React.CSSProperties; onClick?: () => void }>> = ({ children, style, onClick }) => (
+const Card: React.FC<
+  React.PropsWithChildren<{
+    style?: React.CSSProperties;
+    onClick?: () => void;
+    hoverDetails?: boolean; // показывать ли затемняющую плашку «Подробнее»
+  }>
+> = ({ children, style, onClick, hoverDetails = false }) => (
   <div
     onClick={onClick}
     style={{
@@ -19,34 +25,39 @@ const Card: React.FC<React.PropsWithChildren<{ style?: React.CSSProperties; onCl
       ...style,
     }}
     onMouseEnter={(e) => {
-      const overlay = e.currentTarget.querySelector(".overlay") as HTMLElement;
+      if (!hoverDetails) return;
+      const overlay = e.currentTarget.querySelector(".overlay") as HTMLElement | null;
       if (overlay) overlay.style.opacity = "1";
     }}
     onMouseLeave={(e) => {
-      const overlay = e.currentTarget.querySelector(".overlay") as HTMLElement;
+      if (!hoverDetails) return;
+      const overlay = e.currentTarget.querySelector(".overlay") as HTMLElement | null;
       if (overlay) overlay.style.opacity = "0";
     }}
   >
     {children}
-    <div
-      className="overlay"
-      style={{
-        position: "absolute",
-        inset: 0,
-        background: "rgba(0,0,0,0.5)",
-        color: "#fff",
-        display: "grid",
-        placeItems: "center",
-        fontSize: 16,
-        fontWeight: 600,
-        opacity: 0,
-        transition: "opacity 0.3s ease",
-      }}
-    >
-      Подробнее
-    </div>
+    {hoverDetails && (
+      <div
+        className="overlay"
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.5)",
+          color: "#fff",
+          display: "grid",
+          placeItems: "center",
+          fontSize: 16,
+          fontWeight: 600,
+          opacity: 0,
+          transition: "opacity 0.3s ease",
+        }}
+      >
+        Подробнее
+      </div>
+    )}
   </div>
 );
+
 const CardHeader: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <div style={{ marginBottom: 8 }}>{children}</div>
 );
@@ -215,7 +226,7 @@ const BOXES: GiftBox[] = [
     name: "Набор малый",
     basePrice: 0,
     fixedSetPrice: 2000,
-    image: "/images/179A9273.jpg",
+    image: "179A9273.jpg", // ← добавили фото малого набора (положи рядом с проектом)
     templates: [
       {
         id: "S-fixed",
@@ -267,23 +278,49 @@ export default function GiftSetBuilder() {
 
   return (
     <div style={{ maxWidth: 1040, margin: "0 auto", padding: 16 }}>
+      {/* Список наборов */}
       {!selectedBox && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px,1fr))", gap: 16 }}>
           {BOXES.map((box) => (
-            <Card key={box.id}>
+            <Card key={box.id} hoverDetails={false}>
               <CardHeader>
                 <CardTitle>
                   <span>{box.name}</span>
                   <Badge>{currency(box.fixedSetPrice ?? box.basePrice)}</Badge>
                 </CardTitle>
               </CardHeader>
+
               <CardContent>
-                <div style={{ flex: 1 }} />
-                <Button full onClick={() => { setSelectedBoxId(box.id); setSelectedTemplateId(box.templates[0].id); }}>Выбрать</Button>
-                <div style={{ fontSize: 12, color: "#6b7280", marginTop: 8, whiteSpace: "pre-line" }}>
+                {/* фото набора */}
+                {box.image ? (
+                  <img
+                    src={box.image}
+                    alt={box.name}
+                    style={{ width: "100%", height: 180, objectFit: "cover", borderRadius: 12, background: "#f3f4f6" }}
+                    onError={(e) => ((e.currentTarget.style.display = "none"))}
+                  />
+                ) : (
+                  <div style={{ height: 180, borderRadius: 12, background: "#f3f4f6" }} />
+                )}
+
+                {/* описание шаблона */}
+                <div style={{ fontSize: 12, color: "#6b7280", whiteSpace: "pre-line" }}>
                   {box.templates[0].title?.split("+").map((line, i) => (
                     <div key={i}>{line.trim()}</div>
                   ))}
+                </div>
+
+                {/* кнопка всегда у нижней кромки */}
+                <div style={{ marginTop: "auto" }}>
+                  <Button
+                    full
+                    onClick={() => {
+                      setSelectedBoxId(box.id);
+                      setSelectedTemplateId(box.templates[0].id);
+                    }}
+                  >
+                    Выбрать
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -291,17 +328,38 @@ export default function GiftSetBuilder() {
         </div>
       )}
 
+      {/* Конструктор */}
       {selectedBox && selectedTemplate && (
         <div style={{ marginTop: 24 }}>
           {Array.from(new Set(selectedTemplate.slots)).map((type) => (
             <div key={type} style={{ marginBottom: 24 }}>
-              <h2>Выберите: {type}</h2>
+              <h2 style={{ margin: 0, marginBottom: 8 }}>Выберите: {type}</h2>
+
               <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }}>
                 {(AROMAS[type] || []).map((ar, i) => (
-                  <Card key={i} onClick={() => setDetail({ type: type as ProductType, aroma: ar })} style={{ minWidth: 220, flex: "0 0 auto" }}>
+                  <Card
+                    key={i}
+                    hoverDetails={true}          // ← затемняющая плашка «Подробнее» только у ароматов
+                    onClick={() => setDetail({ type: type as ProductType, aroma: ar })}
+                    style={{ minWidth: 220, flex: "0 0 auto" }}
+                  >
                     <CardContent>
-                      <div style={{ height: 160, background: "#f3f4f6", borderRadius: 12, display: "grid", placeItems: "center", color: "#9ca3af" }}>Нет фото</div>
-                      <div style={{ fontWeight: 700 }}>{ar.name}</div>
+                      <div
+                        style={{
+                          height: 160,
+                          background: "#f3f4f6",
+                          borderRadius: 12,
+                          display: "grid",
+                          placeItems: "center",
+                          color: "#9ca3af",
+                        }}
+                      >
+                        Нет фото
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                        <div style={{ fontWeight: 700 }}>{ar.name}</div>
+                        <Badge>{type}</Badge>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -311,9 +369,31 @@ export default function GiftSetBuilder() {
         </div>
       )}
 
+      {/* Модалка «Подробнее» */}
       <Modal open={!!detail} onClose={() => setDetail(null)} title={detail?.aroma.name}>
-        {detail ? <div>{detail.aroma.description || "Описание скоро будет"}</div> : null}
-      </Modal>
-    </div>
-  );
-}
+        {detail ? (
+          <div style={{ display: "grid", gap: 12 }}>
+            <div style={{ fontSize: 14, color: "#374151" }}>
+              {detail.aroma.description || "Описание скоро будет"}
+            </div>
+            <div style={{ border: "1px solid #e5e7eb", borderRadius: 12, padding: 12 }}>
+              <h4 style={{ margin: "0 0 8px 0" }}>Пирамида аромата</h4>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+                <tbody>
+                  <tr>
+                    <td style={{ width: 160, color: "#6b7280", padding: "4px 8px" }}>Верхние ноты</td>
+                    <td style={{ padding: "4px 8px" }}>{detail.aroma.pyramid?.top?.join(", ") || "—"}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ width: 160, color: "#6b7280", padding: "4px 8px" }}>Сердце</td>
+                    <td style={{ padding: "4px 8px" }}>{detail.aroma.pyramid?.heart?.join(", ") || "—"}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ width: 160, color: "#6b7280", padding: "4px 8px" }}>База</td>
+                    <td style={{ padding: "4px 8px" }}>{detail.aroma.pyramid?.base?.join(", ") || "—"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
